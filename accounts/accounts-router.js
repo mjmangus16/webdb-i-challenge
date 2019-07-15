@@ -36,17 +36,42 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  // insert into posts () values ()
-
   const account = req.body;
 
   db("accounts")
     .insert(account, "id")
-    .then(arrayOfIds => {
-      // arrayOfIds = [ id of the last record inserted ]
-      const idOfLastRecordInserted = arrayOfIds[0];
+    .then(accounts => {
+      const lastAccount = accounts[0];
 
-      res.status(201).json(idOfLastRecordInserted);
+      res.status(201).json(lastAccount);
+    })
+    .catch(error => res.status(500).json(error));
+});
+
+router.put("/:id", (req, res) => {
+  db("accounts")
+    .where({ id: req.params.id })
+    .update(req.body)
+    .then(count => {
+      if (count > 0) {
+        res.status(200).json({ message: "Account was updated" });
+      } else {
+        res.status(500).json({ message: "Account not found" });
+      }
+    })
+    .catch(error => res.status(500).json(error));
+});
+
+router.delete("/:id", (req, res) => {
+  db("accounts")
+    .where({ id: req.params.id })
+    .del()
+    .then(count => {
+      if (count > 0) {
+        res.status(200).json({ message: "The account was deleted" });
+      } else {
+        res.status(500).json({ message: "The account could not be found" });
+      }
     })
     .catch(error => res.status(500).json(error));
 });
